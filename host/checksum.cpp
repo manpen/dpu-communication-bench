@@ -22,6 +22,12 @@ using T = uint32_t;
 using data_buffer_t = std::vector<T>;
 using data_buffers_t = std::vector<data_buffer_t>;
 
+enum class TransferMode {
+    Broadcast,
+    Rankwise,
+    DPUwise,
+};
+
 void transfer_input_to_dpus(dpu_set_t dpu_set, bool broadcast, const data_buffers_t &buffers);
 
 data_buffer_t generate_buffer(std::mt19937 &urng, size_t n) {
@@ -44,10 +50,10 @@ T compute_checksum(It begin, It end) {
 }
 
 
-void transfer_input_to_dpus(dpu_set_t dpu_set, bool broadcast, const data_buffers_t &buffers) {
+void transfer_input_to_dpus(dpu_set_t dpu_set, TransferMode mode, const data_buffers_t &buffers) {
     const size_t nr_bytes = buffers[0].size() * sizeof(uint32_t);
 
-    if (broadcast) {
+    if (mode == TransferMode::Broadcast) {
         DPU_ASSERT(dpu_broadcast_to(dpu_set, XSTR(DPU_BUFFER), 0, reinterpret_cast<const void *>(buffers[0].data()), nr_bytes,
                                     DPU_XFER_DEFAULT));
     } else {
@@ -58,12 +64,23 @@ void transfer_input_to_dpus(dpu_set_t dpu_set, bool broadcast, const data_buffer
             dpu_set_t dpu;
             uint32_t dpu_id;
             DPU_FOREACH(rank, dpu, dpu_id) {
+                // Shift mapping between rank/dpu wise to make sure each is individual
+                auto buffer_id = (dpu_id + 13*(mode == TransferMode::DPUwise)) % buffers.size();
+
                 // const cast okay, since libdpu only accesses to read
-                DPU_ASSERT(dpu_prepare_xfer(dpu, (void *)(buffers[dpu_id].data())));
+                DPU_ASSERT(dpu_prepare_xfer(dpu, (void *)(buffers[buffer_id].data())));
+
+                if (mode == TransferMode::DPUwise) {
+                    DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_TO_DPU, XSTR(DPU_BUFFER), 0,
+                                             nr_bytes, DPU_XFER_DEFAULT));
+                }
+
             }
 
-            DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_TO_DPU, XSTR(DPU_BUFFER), 0,
-                                     nr_bytes, DPU_XFER_DEFAULT));
+            if (mode == TransferMode::Rankwise) {
+                DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_TO_DPU, XSTR(DPU_BUFFER), 0,
+                                         nr_bytes, DPU_XFER_DEFAULT));
+            }
         }
     }
 }
@@ -95,12 +112,12 @@ uint32_t combine_partial_dpu_results(const dpu_results_t& dpu_result) {
     return checksum;
 }
 
-bool run_test(dpu_set_t dpu_set, bool broadcast,
+bool run_test(dpu_set_t dpu_set, TransferMode mode,
               data_buffers_t &buffers) {
 
-    std::cout << "Run tests with n=" << buffers[0].size() << " and broadcast=" << broadcast;
+    std::cout << "Run tests with n=" << buffers[0].size() << " and mode=" << (int) mode;
 
-    transfer_input_to_dpus(dpu_set, broadcast, buffers);
+    transfer_input_to_dpus(dpu_set, mode, buffers);
 
     DPU_ASSERT(dpu_launch(dpu_set, DPU_SYNCHRONOUS));
     if constexpr (0){
@@ -114,7 +131,13 @@ bool run_test(dpu_set_t dpu_set, bool broadcast,
     for(size_t idx = 0; idx < dpus_results.size(); ++idx) {
         const auto dpu_idx = idx % DPUS_PER_RANK;
         const auto rank_idx = idx / DPUS_PER_RANK;
-        const auto& buffer = buffers[broadcast ? 0 : dpu_idx];
+
+        auto buffer_id = (dpu_idx + 13*(mode == TransferMode::DPUwise)) % buffers.size();
+        if (mode == TransferMode::Broadcast) {
+            buffer_id = 0;
+        }
+
+        const auto& buffer = buffers[buffer_id];
 
         const auto expected_checksum = compute_checksum(buffer.cbegin(), buffer.cend());
 
@@ -167,8 +190,9 @@ int main() {
             }
         }
 
-        if (!run_test(dpu_set, false, buffers)) return 1;
-        if (!run_test(dpu_set, true, buffers)) return 1;
+        if (!run_test(dpu_set, TransferMode::Broadcast, buffers)) return 1;
+        if (!run_test(dpu_set, TransferMode::DPUwise, buffers)) return 1;
+        if (!run_test(dpu_set, TransferMode::Rankwise, buffers)) return 1;
     }
 
     return 0;

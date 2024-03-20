@@ -1,0 +1,17 @@
+# Test and benchmark code for `libdpu`
+
+## Compilation
+
+- Copy upmem's `backends` source into the subfolder `upmem-libdpu`
+  Either by downloading http://sdk-releases.upmem.com/2023.2.0/upmem-src-2023.2.0-Linux-x86_64.tar.gz (and extracting ONLY src/backends)
+  or by cloning https://github.com/manpen/upmem-libdpu
+
+- Run make
+
+## Own compilation
+```
+mkdir build
+cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
+ln -sf /usr/share/ upmem-libdpu/share
+ln -sf /home/manpen/code/upmem-communication/build/upmem-libdpu/hw/libdpuhw.so upmem-libdpu/api/
+```
