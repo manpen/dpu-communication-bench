@@ -1,17 +1,5 @@
-# Test and benchmark code for `libdpu`
+# Data transfer benchmark
 
-## Compilation
-
-- Copy upmem's `backends` source into the subfolder `upmem-libdpu`
-  Either by downloading http://sdk-releases.upmem.com/2023.2.0/upmem-src-2023.2.0-Linux-x86_64.tar.gz (and extracting ONLY src/backends)
-  or by cloning https://github.com/manpen/upmem-libdpu
-
-- Run make
-
-## Own compilation
-```
-mkdir build
-cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
-ln -sf /usr/share/ upmem-libdpu/share
-ln -sf /home/manpen/code/upmem-communication/build/upmem-libdpu/hw/libdpuhw.so upmem-libdpu/api/
-```
+All relevant findings are summerized in [benchmark.ipynb](benchmark.ipynb).
+To run the experiments yourself, delete the `data` directory and execute `run_all_benchmarks.sh` (takes roughly a day).
+The benchmark code and script are "hacked" together and cater towards an Ubuntu 22.04 setup with the upmem SDK installed using the .deb package.
