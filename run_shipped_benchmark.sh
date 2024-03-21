@@ -2,7 +2,7 @@
 set -e
 set -x
 
-LIBDPU_BRANCH=$(cd upmem-libdpu; git rev-parse --abbrev-ref HEAD | perl -pe 's/\//_/g')
+LIBDPU_BRANCH="shipped"
 BUILDDIR=benchmark_$LIBDPU_BRANCH
 rm -rf $BUILDDIR
 
@@ -16,13 +16,10 @@ cd ..
 
 # Build Benchmark
 cd $BUILDDIR
-cmake -DCMAKE_BUILD_TYPE=Release -GNinja ..
+cmake -DCMAKE_BUILD_TYPE=Release -GNinja -DSHIPPED_LIBDPU=ON ..
 ninja
-
-ln -sf /usr/share/ upmem-libdpu/share
-ln -sf $(pwd)/upmem-libdpu/hw/libdpuhw.so upmem-libdpu/api/
 
 export UPMEM_PROFILE_BASE=backend="hw"
 mkdir -p data
 host/checksum
-host/benchmark > ../data/$LIBDPU_BRANCH.log 2> ../data/$LIBDPU_BRANCH.csv
+host/benchmark >> ../data/$LIBDPU_BRANCH.log 2>> ../data/$LIBDPU_BRANCH.csv

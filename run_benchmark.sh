@@ -25,4 +25,4 @@ ln -sf $(pwd)/upmem-libdpu/hw/libdpuhw.so upmem-libdpu/api/
 export UPMEM_PROFILE_BASE=backend="hw"
 mkdir -p data
 host/checksum
-host/benchmark > ../data/$LIBDPU_BRANCH.log 2> ../data/$LIBDPU_BRANCH.csv
+host/benchmark $1 > ../data/$LIBDPU_BRANCH.log 2> ../data/$LIBDPU_BRANCH.csv
