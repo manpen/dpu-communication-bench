@@ -256,7 +256,7 @@ int main(int argc, char* argv[]) {
       unaligned_buffers.push_back(p + 1);
   }
 
-  for (int i = 0; i < 5; ++i) {
+  for (int i = 0; i < 3; ++i) {
       for (int nrThreadPerPool = 1; nrThreadPerPool <= 8;
            nrThreadPerPool *= 2) {
 

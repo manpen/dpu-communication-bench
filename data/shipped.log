@@ -1,0 +1,29 @@
+Allocated 30720 MiB on node 0
+Allocated 30720 MiB on node 1
+Allocated 30720 MiB on node 2
+Allocated 30720 MiB on node 3
+Timer[Allocation]: 12.1904s (scale=1)
+Profile: nrThreadPerPool=1
+Got 2048 DPUs
+Profile: nrThreadPerPool=2
+Got 2048 DPUs
+Profile: nrThreadPerPool=4
+Got 2048 DPUs
+Profile: nrThreadPerPool=8
+Got 2048 DPUs
+Profile: nrThreadPerPool=1
+Got 2048 DPUs
+Profile: nrThreadPerPool=2
+Got 2048 DPUs
+Profile: nrThreadPerPool=4
+Got 2048 DPUs
+Profile: nrThreadPerPool=8
+Got 2048 DPUs
+Profile: nrThreadPerPool=1
+Got 2048 DPUs
+Profile: nrThreadPerPool=2
+Got 2048 DPUs
+Profile: nrThreadPerPool=4
+Got 2048 DPUs
+Profile: nrThreadPerPool=8
+Got 2048 DPUs
