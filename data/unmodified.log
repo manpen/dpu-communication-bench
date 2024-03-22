@@ -60,3 +60,17 @@ Profile: nrThreadPerPool=8
 Got 2048 DPUs
 Profile: nrThreadPerPool=1
 Got 2048 DPUs
+Profile: nrThreadPerPool=2
+Got 2048 DPUs
+Profile: nrThreadPerPool=4
+Got 2048 DPUs
+Profile: nrThreadPerPool=8
+Got 2048 DPUs
+Profile: nrThreadPerPool=1
+Got 2048 DPUs
+Profile: nrThreadPerPool=2
+Got 2048 DPUs
+Profile: nrThreadPerPool=4
+Got 2048 DPUs
+Profile: nrThreadPerPool=8
+Got 2048 DPUs
